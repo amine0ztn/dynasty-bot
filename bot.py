@@ -131,6 +131,12 @@ class FormulaireCandidature(discord.ui.Modal, title="Candidature - Dynasty"):
         required=True,
         max_length=1000,
     )
+    telephone = discord.ui.TextInput(
+        label="Numéro de téléphone",
+        placeholder="Ex: 06 12 34 56 78",
+        required=True,
+        max_length=20,
+    )
 
     async def on_submit(self, interaction: discord.Interaction):
         salon = interaction.guild.get_channel(SALON_CANDIDATURES_ID)
@@ -153,6 +159,7 @@ class FormulaireCandidature(discord.ui.Modal, title="Candidature - Dynasty"):
         embed.add_field(name="Âge", value=self.age.value, inline=True)
         embed.add_field(name="Pourquoi rejoindre le Dynasty ?", value=self.raison.value, inline=False)
         embed.add_field(name="Lettre de motivation", value=self.lettre_motivation.value, inline=False)
+        embed.add_field(name="Numéro de téléphone", value=self.telephone.value, inline=True)
         embed.set_footer(text=f"ID utilisateur : {interaction.user.id}")
 
         # L'embed complet (Nom RP, Motivation...) n'est visible QUE par le candidat (ephemeral plus bas).
