@@ -3,8 +3,9 @@
  BOT DISCORD - DYNASTY (South District RP)
 ============================================================
 Fonctionnalités :
-  1. Système de candidature (formulaire en DM + ticket)
+  1. Système de candidature (formulaire + vote Direction/RH/Manager)
   2. Modération de base (kick, mute, clear, ban)
+  3. Message de bienvenue automatique à l'arrivée d'un membre
 
 Avant de lancer ce bot, lis le fichier GUIDE_HEBERGEMENT.md
 ============================================================
@@ -44,6 +45,9 @@ ROLES_VOTANTS = [1520349188083286137, 1520349367108763800, 1520349596142796892]
 # Rôles autorisés à utiliser les commandes de modération
 ROLES_MODERATION = []  # <-- liste d'IDs de rôles, ex: [123456789, 987654321]
 
+# ID du salon où le message de bienvenue sera posté quand quelqu'un rejoint le serveur
+SALON_BIENVENUE_ID = 1520004684264378458
+
 # ============================================================
 # INITIALISATION DU BOT
 # ============================================================
@@ -59,6 +63,41 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 async def on_ready():
     await bot.tree.sync()
     print(f"✅ Connecté en tant que {bot.user} - Dynasty Bot est en ligne.")
+
+
+# ============================================================
+# MESSAGE DE BIENVENUE
+# ============================================================
+
+@bot.event
+async def on_member_join(member: discord.Member):
+    salon = member.guild.get_channel(SALON_BIENVENUE_ID)
+    if salon is None:
+        print("⚠️ SALON_BIENVENUE_ID n'est pas configuré ou invalide.")
+        return
+
+    embed = discord.Embed(
+        title="🏢 BIENVENUE CHEZ DYNASTY 🏢",
+        description=(
+            "*South District RP*\n\n"
+            "Bonjour et bienvenue parmi nous !\n\n"
+            "**Dynasty** est l'une des entreprises les plus respectées de **South District**. "
+            "Que tu sois un futur client, partenaire, ou que tu rêves de rejoindre nos équipes, "
+            "tu es au bon endroit.\n\n"
+            "📌 **Avant toute chose :**\n"
+            "1️⃣ Lis attentivement le règlement dans `#règlement`\n"
+            "2️⃣ Si tu veux nous rejoindre, utilise la commande `/postuler` pour envoyer ta candidature\n\n"
+            "🤝 **Une question ?** N'hésite pas à nous contacter sur la centrale !!\n\n"
+            "On est ravis de t'accueillir. Bienvenue chez **Dynasty** ! 🚪✨"
+        ),
+        color=discord.Color.from_rgb(0, 200, 120),
+        timestamp=datetime.datetime.now(),
+    )
+    embed.set_author(name=str(member), icon_url=member.display_avatar.url)
+    embed.set_thumbnail(url=member.display_avatar.url)
+    embed.set_footer(text=f"Membre n°{member.guild.member_count} • {member.guild.name}")
+
+    await salon.send(content=member.mention, embed=embed)
 
 
 # ============================================================
