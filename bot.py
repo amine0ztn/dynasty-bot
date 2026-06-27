@@ -66,30 +66,31 @@ async def on_ready():
 # ============================================================
 
 class FormulaireCandidature(discord.ui.Modal, title="Candidature - Dynasty"):
-    pseudo_rp = discord.ui.TextInput(
-        label="Nom et prénom RP",
+    nom_prenom = discord.ui.TextInput(
+        label="Nom et Prénom",
         placeholder="Ex: John Smith",
         required=True,
         max_length=50,
     )
-    age_rp = discord.ui.TextInput(
-        label="Âge du personnage RP",
+    age = discord.ui.TextInput(
+        label="Âge",
         placeholder="Ex: 27",
         required=True,
         max_length=3,
     )
-    motivation = discord.ui.TextInput(
-        label="Pourquoi rejoindre Dynasty ?",
+    raison = discord.ui.TextInput(
+        label="Pourquoi rejoindre le Dynasty ?",
         style=discord.TextStyle.paragraph,
-        placeholder="Explique ta motivation en quelques lignes...",
+        placeholder="Explique en quelques lignes...",
         required=True,
         max_length=500,
     )
-    experience = discord.ui.TextInput(
-        label="As-tu déjà fait du RP ? Où ?",
+    lettre_motivation = discord.ui.TextInput(
+        label="Lettre de motivation",
         style=discord.TextStyle.paragraph,
-        required=False,
-        max_length=300,
+        placeholder="Présente-toi et explique ce que tu peux apporter à Dynasty...",
+        required=True,
+        max_length=1000,
     )
 
     async def on_submit(self, interaction: discord.Interaction):
@@ -109,21 +110,27 @@ class FormulaireCandidature(discord.ui.Modal, title="Candidature - Dynasty"):
         )
         embed.set_author(name=str(interaction.user), icon_url=interaction.user.display_avatar.url)
         embed.add_field(name="Discord", value=interaction.user.mention, inline=True)
-        embed.add_field(name="Nom RP", value=self.pseudo_rp.value, inline=True)
-        embed.add_field(name="Âge RP", value=self.age_rp.value, inline=True)
-        embed.add_field(name="Motivation", value=self.motivation.value, inline=False)
-        if self.experience.value:
-            embed.add_field(name="Expérience RP", value=self.experience.value, inline=False)
+        embed.add_field(name="Nom et Prénom", value=self.nom_prenom.value, inline=True)
+        embed.add_field(name="Âge", value=self.age.value, inline=True)
+        embed.add_field(name="Pourquoi rejoindre le Dynasty ?", value=self.raison.value, inline=False)
+        embed.add_field(name="Lettre de motivation", value=self.lettre_motivation.value, inline=False)
         embed.set_footer(text=f"ID utilisateur : {interaction.user.id}")
 
-        # Poste la candidature (sans boutons) dans #candidatures, pour archivage/lecture
+        # L'embed complet (Nom RP, Motivation...) n'est visible QUE par le candidat (ephemeral plus bas).
+        # Dans #candidature, on poste juste une notification sans détail pour Direction + RH.
+
+        # 1) Notifie Direction + RH dans #candidature, SANS afficher le détail de la candidature
         pings = " ".join(f"<@&{r}>" for r in (ROLE_RH_ID, ROLE_DIRECTEUR_ID) if r)
         await salon.send(
-            content=pings if pings else None,
-            embed=embed,
+            content=(
+                f"{pings}\n📋 Nouvelle candidature de {interaction.user.mention} reçue. "
+                f"Détails envoyés en privé + vote disponible dans le salon de vote."
+                if pings else
+                f"📋 Nouvelle candidature de {interaction.user.mention} reçue."
+            ),
         )
 
-        # Poste le VOTE dans #réponses-candidatures (Direction + RH + Managers)
+        # 2) Poste le VOTE complet dans #réponses-candidatures (Direction + RH + Managers)
         salon_vote = interaction.guild.get_channel(SALON_VOTE_ID)
         if salon_vote is not None:
             embed_vote = embed.copy()
@@ -145,8 +152,11 @@ class FormulaireCandidature(discord.ui.Modal, title="Candidature - Dynasty"):
                 except discord.Forbidden:
                     pass
 
+        # 3) Le candidat reçoit la confirmation + le récap de SA candidature, en privé (lui seul le voit)
         await interaction.response.send_message(
-            "✅ Ta candidature a bien été envoyée à l'équipe de Dynasty ! Tu seras contacté(e) prochainement.",
+            "✅ Ta candidature a bien été envoyée à l'équipe de Dynasty ! Tu seras contacté(e) prochainement.\n"
+            "Voici un récapitulatif de ce que tu as envoyé :",
+            embed=embed,
             ephemeral=True,
         )
 
