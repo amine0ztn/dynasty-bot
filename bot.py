@@ -133,7 +133,7 @@ class FormulaireCandidature(discord.ui.Modal, title="Candidature - Dynasty"):
     )
     telephone = discord.ui.TextInput(
         label="Numéro de téléphone",
-        placeholder="Ex: 06 12 34 56 78",
+        placeholder="Ex: 555-2564",
         required=True,
         max_length=20,
     )
