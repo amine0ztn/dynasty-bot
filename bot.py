@@ -118,7 +118,7 @@ class FormulaireCandidature(discord.ui.Modal, title="Candidature - Dynasty"):
         max_length=3,
     )
     raison = discord.ui.TextInput(
-        label="Pourquoi rejoindre le Dynasty ?",
+        label="Expérience RP",
         style=discord.TextStyle.paragraph,
         placeholder="Explique en quelques lignes...",
         required=True,
